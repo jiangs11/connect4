@@ -1,0 +1,77 @@
+:root {
+    --whiteCircleColor: white;
+    /* --redCircleColor: rgb(251, 42, 42); */
+    --redCircleColor: red;
+    /* --yellowCircleColor: rgb(243, 239, 20); */
+    --yellowCircleColor: black;
+}
+
+.gameCell {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #1990ff;
+}
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+.whiteCircle,
+.redCircle,
+.yellowCircle {
+    width: 90%;
+    aspect-ratio: 1 / 1;
+    border-radius: 100px;
+
+    transform: perspective(75em) rotateX(18deg);
+    box-shadow: black 0px 60px 123px -25px, black 0px 35px 75px -35px;
+    border: 2px solid;
+}
+
+.whiteCircle {
+    /* background-color: var(--whiteCircleColor); */
+    background-color: rgba(255, 255, 255, 1);
+
+}
+
+.redCircle {
+    background-color: var(--redCircleColor);
+    transition: background-color 0.3s;
+}
+
+.yellowCircle {
+    background-color: var(--yellowCircleColor);
+    transition: background-color 0.3s;
+}
+
+.test {
+    background-color: orange;
+}
+
+.draw {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.player1 {
+    color: rgba(255, 0, 0, 0.4);
+}
+
+.player1Active {
+    color: rgba(255, 0, 0, 1);
+    font-weight: bold;
+}
+
+.player2 {
+    /* color: rgba(255, 215, 0, 0.4); */
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.player2Active {
+    /* color: rgba(255, 215, 0, 1); */
+    color: rgba(0, 0, 0, 1);
+    font-weight: bold;
+}
+
+.disablePointerEvents {
+    pointer-events: none;
+}
