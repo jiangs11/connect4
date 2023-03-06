@@ -1,15 +1,20 @@
-import { useReducer } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { Row } from "./Row";
 import { Flex } from "@chakra-ui/layout";
 import { Button, Text } from "@chakra-ui/react";
+import { IconContext } from "react-icons";
+import { RiArrowDownSFill } from "react-icons/ri";
 import {
     generateNewBoard,
     placePiece,
     checkWinner,
     checkMaxedColumn,
-    disableCellClick,
+    toggleWinningCellBlink,
+    toggleCursorPointer,
 } from "../utility/utilityFunctions";
 
+const numRows = 6;
+const numCols = 7;
 const gameReducer = (state, action) => {
     switch (action.type) {
         case "newGame":
@@ -17,6 +22,7 @@ const gameReducer = (state, action) => {
                 ...state,
                 board: action.board,
                 currentPlayer: 1,
+                winningCellIds: [],
                 gameOver: false,
             };
         case "switchPlayer":
@@ -35,6 +41,11 @@ const gameReducer = (state, action) => {
                 message: action.message,
                 gameOver: true,
             };
+        case "setWinningCellIDs":
+            return {
+                ...state,
+                winningCellIds: action.winningCellIds,
+            };
         default:
             throw Error(`Action "${action.type}" is not a valid action.`);
     }
@@ -44,25 +55,49 @@ const initialGameState = {
     player1: 1,
     player2: 2,
     currentPlayer: 1,
-    board: [
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-    ],
+    board: generateNewBoard(numRows, numCols),
+    // board: [
+    //     [2, 2, 2, null, 1, 2, 2],
+    //     [1, 1, 1, 2, 2, 1, 1],
+    //     [2, 1, 2, 1, 1, 2, 2],
+    //     [2, 1, 2, 2, 1, 2, 1],
+    //     [1, 2, 2, 1, 1, 2, 1],
+    //     [2, 1, 1, 2, 2, 1, 1],
+    // ],
     player1WinCount: 0,
     player2WinCount: 0,
     drawGameCount: 0,
+    winningCellIds: [],
     gameOver: false,
 };
 
 export const Board = () => {
+    const [isWebBrowser, setIsWebBrowser] = useState(false);
+    const [showArrow, setShowArrow] = useState(new Array(numCols).fill(false));
     const [gameState, dispatchGameState] = useReducer(
         gameReducer,
         initialGameState
     );
+
+    useEffect(() => {
+        if (typeof window.orientation === "undefined") {
+            setIsWebBrowser(true);
+        }
+        toggleWinningCellBlink(gameState.winningCellIds);
+    }, [gameState]);
+
+    const checkForMaxColReached = (updatedBoard) => {
+        for (let i = 0; i < gameState.board.length - 1; i++) {
+            if (checkMaxedColumn(updatedBoard, i)) {
+                document
+                    .querySelectorAll(".cell")
+                    .forEach((e) => (e.style.pointerEvents = "auto"));
+                for (let i = 0; i < gameState.board.length - 1; i++) {
+                    toggleCursorPointer(i, false);
+                }
+            }
+        }
+    };
 
     const play = async (columnIndex) => {
         if (gameState.gameOver) {
@@ -84,24 +119,24 @@ export const Board = () => {
             .getElementById("boardTable")
             .classList.toggle("disablePointerEvents");
 
-        console.log("UPDATED BOARD: ", updatedBoard);
-
         if (checkMaxedColumn(updatedBoard, columnIndex)) {
-            disableCellClick(columnIndex);
+            toggleCursorPointer(columnIndex, true);
         }
 
-        let result = checkWinner(updatedBoard);
+        let result = checkWinner(updatedBoard, dispatchGameState);
         if (result === true) {
             var player1WinCount = gameState.player1WinCount;
             var player2WinCount = gameState.player2WinCount;
+            var playerColor = "";
 
             if (gameState.currentPlayer === gameState.player1) {
-                var playerColor = "red";
+                playerColor = "red";
                 player1WinCount += 1;
             } else {
-                var playerColor = "yellow";
+                playerColor = "yellow";
                 player2WinCount += 1;
             }
+            checkForMaxColReached(updatedBoard, columnIndex);
             let drawGameCount = gameState.drawGameCount;
             let message = `Player ${gameState.currentPlayer} (${playerColor}) won!`;
             dispatchGameState({
@@ -112,13 +147,11 @@ export const Board = () => {
                 player2WinCount,
                 drawGameCount,
             });
-            document
-                .getElementById(gameState.currentPlayer)
-                .classList.toggle("winnerBlinker");
         } else if (result === "DRAW") {
-            var player1WinCount = gameState.player1WinCount;
-            var player2WinCount = gameState.player2WinCount;
-            var drawGameCount = gameState.drawGameCount + 1;
+            let player1WinCount = gameState.player1WinCount;
+            let player2WinCount = gameState.player2WinCount;
+            let drawGameCount = gameState.drawGameCount + 1;
+            checkForMaxColReached(updatedBoard, columnIndex);
 
             let message = `It was a DRAW!`;
             dispatchGameState({
@@ -151,10 +184,14 @@ export const Board = () => {
     };
 
     const handleNewGame = () => {
-        dispatchGameState({ type: "newGame", board: generateNewBoard() });
-        document
-            .querySelectorAll(".cell")
-            .forEach((e) => (e.style.pointerEvents = "auto"));
+        toggleWinningCellBlink(gameState.winningCellIds);
+        dispatchGameState({
+            type: "newGame",
+            board: generateNewBoard(numRows, numCols),
+        });
+        for (let i = 0; i < gameState.board.length - 1; i++) {
+            toggleCursorPointer(i, false);
+        }
         resetPlayerActive();
     };
 
@@ -162,10 +199,22 @@ export const Board = () => {
         const player1 = document.getElementById(gameState.player1);
         player1.classList.remove("player1Active");
         player1.classList.add("player1Active");
-        
+
         document
             .getElementById(gameState.player2)
             .classList.remove("player2Active");
+    };
+
+    const handleHoverEvent = (allClassNames, mouseEnter) => {
+        var newShowArrow = new Array(numCols).fill(false);
+
+        if (mouseEnter) {
+            const found = allClassNames.match(/col(.*)/);
+            const colWithIndex = found[0].split(" ")[0];
+            const index = colWithIndex.replace("col", "");
+            newShowArrow[index] = true;
+        }
+        setShowArrow(newShowArrow);
     };
 
     return (
@@ -174,26 +223,63 @@ export const Board = () => {
                 justify="center"
                 align="center"
                 direction="column"
-                style={{ width: "100%", maxWidth: '100%' }}
+                style={{
+                    width: "100%",
+                    maxWidth: "100%",
+                }}
             >
+                {isWebBrowser && (
+                    <Flex
+                        justify="space-evenly"
+                        align="center"
+                        style={{
+                            width: window.innerWidth - 50,
+                            maxWidth: "500px",
+                            marginTop: -20,
+                            // backgroundColor: 'red'
+                        }}
+                    >
+                        <IconContext.Provider
+                            value={{ className: "shared-class", size: 100 }}
+                        >
+                            {gameState.board[0].map((_, i) =>
+                                showArrow[i] ? (
+                                    <RiArrowDownSFill
+                                        key={i}
+                                        style={{
+                                            margin: -20,
+                                        }}
+                                    />
+                                ) : (
+                                    <RiArrowDownSFill
+                                        key={i}
+                                        style={{
+                                            margin: -20,
+                                            opacity: 0,
+                                        }}
+                                    />
+                                )
+                            )}
+                        </IconContext.Provider>
+                    </Flex>
+                )}
                 <table
                     id="boardTable"
                     style={{
                         backgroundColor: "#1990ff",
                         width: window.innerWidth - 50,
                         maxWidth: "500px",
-                        // backgroundColor: "green",
-
-                        // transform: "perspective(75em) rotateX(-1deg)",
-                        // boxShadow:
-                        //     "rgba(22, 31, 39, 0.42) 0px 60px 123px -25px, rgba(19, 26, 32, 0.08) 0px 35px 75px -35px",
-                        // borderColor:
-                        //     "rgb(213, 220, 226), rgb(213, 220, 226), rgb(184, 194, 204)",
                     }}
                 >
                     <tbody>
                         {gameState.board.map((row, i) => (
-                            <Row key={i} row={row} play={play} />
+                            <Row
+                                key={i}
+                                row={row}
+                                rowIndex={i}
+                                play={play}
+                                handleHoverEvent={handleHoverEvent}
+                            />
                         ))}
                     </tbody>
                 </table>
@@ -213,9 +299,8 @@ export const Board = () => {
                         direction="column"
                         id="1"
                         className="player1 player1Active"
-                        // style={{ backgroundColor: 'orange' }}
                     >
-                        <Text>Player 1</Text>
+                        <Text>Player One</Text>
                         <Text>{gameState.player1WinCount}</Text>
                     </Flex>
                     <Flex
@@ -235,7 +320,7 @@ export const Board = () => {
                         id="2"
                         className="player2"
                     >
-                        <Text>Player 2</Text>
+                        <Text>Player Two</Text>
                         <Text>{gameState.player2WinCount}</Text>
                     </Flex>
                 </Flex>

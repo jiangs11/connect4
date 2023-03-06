@@ -31,7 +31,6 @@
 .whiteCircle {
     /* background-color: var(--whiteCircleColor); */
     background-color: rgba(255, 255, 255, 1);
-
 }
 
 .redCircle {
@@ -42,10 +41,6 @@
 .yellowCircle {
     background-color: var(--yellowCircleColor);
     transition: background-color 0.3s;
-}
-
-.test {
-    background-color: orange;
 }
 
 .draw {
@@ -74,4 +69,14 @@
 
 .disablePointerEvents {
     pointer-events: none;
+}
+
+.blinkCell {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
 }

@@ -1,16 +1,23 @@
 import { Flex } from "@chakra-ui/layout";
 
-export const Row = ({ row, play }) => {
+export const Row = ({ row, rowIndex, play, handleHoverEvent }) => {
     return (
         <tr>
             {row.map((cell, i) => (
-                <Cell key={i} value={cell} columnIndex={i} play={play} />
+                <Cell
+                    key={i}
+                    value={cell}
+                    rowIndex={rowIndex}
+                    columnIndex={i}
+                    play={play}
+                    handleHoverEvent={handleHoverEvent}
+                />
             ))}
         </tr>
     );
 };
 
-const Cell = ({ value, columnIndex, play }) => {
+const Cell = ({ value, rowIndex, columnIndex, play, handleHoverEvent }) => {
     let color = "whiteCircle";
 
     if (value === 1) {
@@ -28,10 +35,21 @@ const Cell = ({ value, columnIndex, play }) => {
                 onClick={() => {
                     play(columnIndex);
                 }}
+                onMouseOver={(e) => handleHoverEvent(e.target.className, true)}
+                // onMouseLeave={(e) => handleHoverEvent(e.target.className, false)}
             >
                 <div
+                    id={"cellNumber" + rowIndex + columnIndex}
                     className={
-                        "colCircle" + columnIndex + " " + color
+                        "col" +
+                        columnIndex +
+                        " colCircle" +
+                        columnIndex +
+                        " " +
+                        color
+                    }
+                    onMouseOver={(e) =>
+                        handleHoverEvent(e.target.className, true)
                     }
                 ></div>
             </Flex>
