@@ -3,6 +3,7 @@
     /* --redCircleColor: rgb(251, 42, 42); */
     --redCircleColor: red;
     /* --yellowCircleColor: rgb(243, 239, 20); */
+    /* --yellowCircleColor: gold; */
     --yellowCircleColor: black;
 }
 
@@ -19,7 +20,7 @@
 .whiteCircle,
 .redCircle,
 .yellowCircle {
-    width: 90%;
+    width: 92%;
     aspect-ratio: 1 / 1;
     border-radius: 100px;
 
@@ -29,7 +30,6 @@
 }
 
 .whiteCircle {
-    /* background-color: var(--whiteCircleColor); */
     background-color: rgba(255, 255, 255, 1);
 }
 

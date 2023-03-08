@@ -13,8 +13,9 @@ import {
     toggleCursorPointer,
 } from "../utility/utilityFunctions";
 
-const numRows = 6;
-const numCols = 7;
+const numRows = 7;
+const numCols = 8;
+
 const gameReducer = (state, action) => {
     switch (action.type) {
         case "newGame":
@@ -217,6 +218,10 @@ export const Board = () => {
         setShowArrow(newShowArrow);
     };
 
+    const styles = {
+        maxWidth: 520
+    }
+
     return (
         <>
             <Flex
@@ -234,9 +239,8 @@ export const Board = () => {
                         align="center"
                         style={{
                             width: window.innerWidth - 50,
-                            maxWidth: "500px",
+                            maxWidth: styles.maxWidth,
                             marginTop: -20,
-                            // backgroundColor: 'red'
                         }}
                     >
                         <IconContext.Provider
@@ -247,14 +251,20 @@ export const Board = () => {
                                     <RiArrowDownSFill
                                         key={i}
                                         style={{
-                                            margin: -20,
+                                            color:
+                                                gameState.currentPlayer === 1
+                                                    ? "red"
+                                                    : "black",
+                                            height: 50,
+                                            marginBottom: -10,
                                         }}
                                     />
                                 ) : (
                                     <RiArrowDownSFill
                                         key={i}
                                         style={{
-                                            margin: -20,
+                                            height: 50,
+                                            marginBottom: -10,
                                             opacity: 0,
                                         }}
                                     />
@@ -268,7 +278,7 @@ export const Board = () => {
                     style={{
                         backgroundColor: "#1990ff",
                         width: window.innerWidth - 50,
-                        maxWidth: "500px",
+                        maxWidth: styles.maxWidth,
                     }}
                 >
                     <tbody>
@@ -288,9 +298,9 @@ export const Board = () => {
                     align="center"
                     className="scoreboard"
                     style={{
-                        width: "500px",
+                        width: styles.maxWidth,
                         maxWidth: "100%",
-                        marginTop: 10,
+                        marginTop: 5,
                     }}
                 >
                     <Flex
@@ -326,7 +336,11 @@ export const Board = () => {
                 </Flex>
             </Flex>
 
-            <Button colorScheme="purple" onClick={() => handleNewGame()}>
+            <Button
+                colorScheme="purple"
+                style={{ marginTop: 5 }}
+                onClick={() => handleNewGame()}
+            >
                 New Game
             </Button>
         </>

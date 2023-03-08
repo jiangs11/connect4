@@ -36,7 +36,6 @@ const Cell = ({ value, rowIndex, columnIndex, play, handleHoverEvent }) => {
                     play(columnIndex);
                 }}
                 onMouseOver={(e) => handleHoverEvent(e.target.className, true)}
-                // onMouseLeave={(e) => handleHoverEvent(e.target.className, false)}
             >
                 <div
                     id={"cellNumber" + rowIndex + columnIndex}
